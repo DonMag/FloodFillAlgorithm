@@ -148,6 +148,16 @@ class FloodViewTestVC: UIViewController {
 			infoLabel.bottomAnchor.constraint(equalTo: g.bottomAnchor, constant: -20.0),
 			
 		])
+		
+		let v = TmpView()
+		v.translatesAutoresizingMaskIntoConstraints = false
+		view.addSubview(v)
+		NSLayoutConstraint.activate([
+			v.topAnchor.constraint(equalTo: floodView.topAnchor),
+			v.leadingAnchor.constraint(equalTo: floodView.leadingAnchor),
+			v.trailingAnchor.constraint(equalTo: floodView.trailingAnchor),
+			v.bottomAnchor.constraint(equalTo: floodView.bottomAnchor),
+		])
 	
 		// set colors array
 		floodView.colors = colors
@@ -159,6 +169,10 @@ class FloodViewTestVC: UIViewController {
 		floodView.newColor = 2
 
 		floodView.floodShape = .square
+		
+		//floodView.isHidden = true
+		//v.backgroundColor = .clear
+		v.isHidden = true
 	}
 	
 	@objc func newColorTap(_ sender: Any?) {
