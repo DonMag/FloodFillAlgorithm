@@ -15,6 +15,11 @@ enum FloodShape: String, Codable, CaseIterable {
 	case random = "Random"
 }
 
+@objc protocol FloodViewDelegate {
+	@objc optional func algorithmTime(_ t: CFTimeInterval, changed: Bool)
+	@objc optional func drawTime(_ t: CFTimeInterval)
+}
+
 class FloodView: UIView {
 	
 	public var floodShape: FloodShape = .square {
@@ -48,8 +53,11 @@ class FloodView: UIView {
 	}
 	
 	public var colors: [UIColor] = [
-		.red, .blue,
+		.red, .green, .blue,
+		.cyan, .magenta, .yellow,
 	]
+	
+	public var delegate: FloodViewDelegate?
 	
 	override var bounds: CGRect {
 		didSet {
@@ -92,12 +100,7 @@ class FloodView: UIView {
 		
 		let elapsed = CFAbsoluteTimeGetCurrent() - st
 		
-		let nf = NumberFormatter()
-		nf.maximumFractionDigits = 8
-		
-		//let str = "\(bChanged) :- bufSize: \(screenBuffer.count) :- Elapsed Time: " + nf.string(from: NSNumber(value: elapsed))! + " seconds"
-		let str = "Elapsed Time: " + nf.string(from: NSNumber(value: elapsed))! + " seconds"
-		print(str)
+		delegate?.algorithmTime?(elapsed, changed: bChanged)
 		
 		if bChanged {
 			setNeedsDisplay()
@@ -112,12 +115,17 @@ class FloodView: UIView {
 			
 			guard let context = UIGraphicsGetCurrentContext() else { return }
 			
+			let st = CFAbsoluteTimeGetCurrent()
+
 			for r in 0..<screenBuffer.h {
 				for c in 0..<screenBuffer.w {
 					colors[screenBuffer.buffer[r * screenBuffer.w + c]].setFill()
 					context.fill(CGRect(x: c, y: r, width: 1, height: 1))
 				}
 			}
+			
+			let elapsed = CFAbsoluteTimeGetCurrent() - st
+			delegate?.drawTime?(elapsed)
 			
 		}
 		
@@ -137,7 +145,7 @@ extension FloodView {
 		assert(y < h, "p.y \(y) out of range, must be < \(h)")
 		
 		if oldColor == newColor {
-			print("old == new")
+			// same color selected to fill as color tapped
 			return false
 		}
 		
@@ -146,7 +154,7 @@ extension FloodView {
 		
 		var x1: Int = 0
 		
-		var stack : [(Int, Int)] = [(x, y)] // 0 is X, 1 is Y
+		var stack : [(Int, Int)] = [(x, y)]
 		
 		while let pp = stack.popLast() {
 			
@@ -162,6 +170,7 @@ extension FloodView {
 			spanBelow = false
 			
 			while(x1 < w && screenBuffer.buffer[y * w + x1] == oldColor) {
+				
 				screenBuffer.buffer[y * w + x1] = newColor;
 				
 				if(!spanAbove && y > 0 && screenBuffer.buffer[(y - 1) * w + x1] == oldColor) {
@@ -282,43 +291,6 @@ extension FloodView {
 			Int(bounds.width * 0.20),
 			Int(bounds.width * 0.15),
 		]
-
-		var newVals: [Int] = [
-			0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0,
-			0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0,
-			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-			0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0,
-			0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0,
-		]
-		screenBuffer.replaceRectWithAlpha(CGRect(x: 0, y: 0, width: 12, height: 8), with: newVals, alpha: 0)
-
-		screenBuffer.replaceRectWithAlpha(CGRect(x: 100, y: 100, width: 12, height: 8), with: newVals, alpha: nil)
-
-		return()
-		
-		newVals = [
-			2, 2, 3, 3, 3, 4, 4,
-			2, 2, 3, 3, 3, 4, 4,
-			2, 2, 5, 5, 5, 4, 4,
-			2, 2, 3, 3, 3, 4, 4,
-			2, 2, 3, 3, 3, 4, 4,
-		]
-		
-		screenBuffer.replaceRectWithAlpha(CGRect(x: 0, y: 0, width: 7, height: 5), with: newVals, alpha: nil)
-		
-		return()
-		
-		var x: CGFloat = 0
-		var y: CGFloat = 0
-		var w: CGFloat = 1
-		var h: CGFloat = 1
-		w = 1
-		h = 100
-		screenBuffer.fillRect(CGRect(x: x, y: y, width: w, height: h), colorNumber: 1)
-		return()
 		
 		// don't use last color
 		let m = colors.count - 1
@@ -405,11 +377,3 @@ extension FloodView {
 	
 }
 
-extension CGPoint {
-	func offsetBy(dx: CGFloat, dy: CGFloat) -> CGPoint {
-		return CGPoint(x: x + dx, y: y + dy)
-	}
-	func multipliedBy(dx: CGFloat, dy: CGFloat) -> CGPoint {
-		return CGPoint(x: x * dx, y: y * dy)
-	}
-}

@@ -23,7 +23,7 @@ enum GridSize: String, Codable, CaseIterable {
 	}
 }
 
-class FloodViewTestVC: UIViewController {
+class FloodViewTestVC: UIViewController, FloodViewDelegate {
 	
 	let colors: [UIColor] = [
 		.systemRed, .systemGreen, .systemBlue,
@@ -34,7 +34,15 @@ class FloodViewTestVC: UIViewController {
 	
 	let floodView = FloodView()
 	
-	let infoLabel: UILabel = {
+	let infoLabelAlgorithm: UILabel = {
+		let v = UILabel()
+		v.textAlignment = .center
+		v.backgroundColor = UIColor(white: 0.9, alpha: 1.0)
+		v.translatesAutoresizingMaskIntoConstraints = false
+		return v
+	}()
+	
+	let infoLabelDraw: UILabel = {
 		let v = UILabel()
 		v.textAlignment = .center
 		v.backgroundColor = UIColor(white: 0.9, alpha: 1.0)
@@ -128,8 +136,14 @@ class FloodViewTestVC: UIViewController {
 		floodView.translatesAutoresizingMaskIntoConstraints = false
 		view.addSubview(floodView)
 		
-		view.addSubview(infoLabel)
-		
+		[infoLabelAlgorithm, infoLabelDraw].forEach { v in
+			v.textAlignment = .center
+			v.backgroundColor = UIColor(white: 0.9, alpha: 1.0)
+			v.font = .systemFont(ofSize: 13.0, weight: .light)
+			v.translatesAutoresizingMaskIntoConstraints = false
+			view.addSubview(v)
+		}
+
 		let g = view.safeAreaLayoutGuide
 		
 		fvWidthConstraint = floodView.widthAnchor.constraint(equalToConstant: 256.0)
@@ -145,9 +159,16 @@ class FloodViewTestVC: UIViewController {
 			floodView.centerXAnchor.constraint(equalTo: g.centerXAnchor),
 			floodView.centerYAnchor.constraint(equalTo: g.centerYAnchor),
 			
-			infoLabel.leadingAnchor.constraint(equalTo: g.leadingAnchor, constant: 16),
-			infoLabel.trailingAnchor.constraint(equalTo: g.trailingAnchor, constant: -16),
-			infoLabel.bottomAnchor.constraint(equalTo: g.bottomAnchor, constant: -20.0),
+			infoLabelAlgorithm.leadingAnchor.constraint(equalTo: g.leadingAnchor, constant: 16),
+			infoLabelAlgorithm.trailingAnchor.constraint(equalTo: g.trailingAnchor, constant: -16),
+			infoLabelAlgorithm.bottomAnchor.constraint(equalTo: infoLabelDraw.topAnchor, constant: -4),
+			
+			infoLabelDraw.leadingAnchor.constraint(equalTo: g.leadingAnchor, constant: 16),
+			infoLabelDraw.trailingAnchor.constraint(equalTo: g.trailingAnchor, constant: -16),
+			infoLabelDraw.bottomAnchor.constraint(equalTo: g.bottomAnchor, constant: -20.0),
+			
+			infoLabelDraw.heightAnchor.constraint(equalToConstant: 30.0),
+			infoLabelAlgorithm.heightAnchor.constraint(equalTo: infoLabelDraw.heightAnchor),
 			
 		])
 		
@@ -161,6 +182,8 @@ class FloodViewTestVC: UIViewController {
 		floodView.newColor = 2
 
 		floodView.floodShape = .square
+		
+		floodView.delegate = self
 		
 	}
 	
@@ -197,5 +220,17 @@ class FloodViewTestVC: UIViewController {
 		}
 	}
 	
+	func algorithmTime(_ t: CFTimeInterval, changed: Bool) {
+		let nf = NumberFormatter()
+		nf.maximumFractionDigits = 8
+		let str = "Flood Time: " + nf.string(from: NSNumber(value: t))! + " seconds"
+		infoLabelAlgorithm.text = str
+	}
+	func drawTime(_ t: CFTimeInterval) {
+		let nf = NumberFormatter()
+		nf.maximumFractionDigits = 8
+		let str = "Draw Time: " + nf.string(from: NSNumber(value: t))! + " seconds"
+		infoLabelDraw.text = str
+	}
 }
 

@@ -15,8 +15,8 @@
 		FC67F5C9279316A50014BEEC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC67F5C7279316A50014BEEC /* LaunchScreen.storyboard */; };
 		FC67F5D12793174C0014BEEC /* FloodViewTestVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC67F5D02793174C0014BEEC /* FloodViewTestVC.swift */; };
 		FC67F5D3279317BE0014BEEC /* FloodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC67F5D2279317BE0014BEEC /* FloodView.swift */; };
-		FC67F5D527931EF10014BEEC /* ArrayHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC67F5D427931EF10014BEEC /* ArrayHelpers.swift */; };
 		FCDB0C492795F9090078450B /* MyBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCDB0C482795F9090078450B /* MyBuffer.swift */; };
+		FCDB0C4B27960B4D0078450B /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCDB0C4A27960B4D0078450B /* Helpers.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,8 +30,8 @@
 		FC67F5CA279316A50014BEEC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FC67F5D02793174C0014BEEC /* FloodViewTestVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FloodViewTestVC.swift; sourceTree = "<group>"; };
 		FC67F5D2279317BE0014BEEC /* FloodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloodView.swift; sourceTree = "<group>"; };
-		FC67F5D427931EF10014BEEC /* ArrayHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayHelpers.swift; sourceTree = "<group>"; };
 		FCDB0C482795F9090078450B /* MyBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyBuffer.swift; sourceTree = "<group>"; };
+		FCDB0C4A27960B4D0078450B /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,8 +70,8 @@
 				FC67F5C2279316A20014BEEC /* Main.storyboard */,
 				FC67F5D02793174C0014BEEC /* FloodViewTestVC.swift */,
 				FC67F5D2279317BE0014BEEC /* FloodView.swift */,
-				FC67F5D427931EF10014BEEC /* ArrayHelpers.swift */,
 				FCDB0C482795F9090078450B /* MyBuffer.swift */,
+				FCDB0C4A27960B4D0078450B /* Helpers.swift */,
 				FC67F5C5279316A50014BEEC /* Assets.xcassets */,
 				FC67F5C7279316A50014BEEC /* LaunchScreen.storyboard */,
 				FC67F5CA279316A50014BEEC /* Info.plist */,
@@ -151,8 +151,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				FCDB0C492795F9090078450B /* MyBuffer.swift in Sources */,
+				FCDB0C4B27960B4D0078450B /* Helpers.swift in Sources */,
 				FC67F5D12793174C0014BEEC /* FloodViewTestVC.swift in Sources */,
-				FC67F5D527931EF10014BEEC /* ArrayHelpers.swift in Sources */,
 				FC67F5C1279316A20014BEEC /* ViewController.swift in Sources */,
 				FC67F5BD279316A20014BEEC /* AppDelegate.swift in Sources */,
 				FC67F5D3279317BE0014BEEC /* FloodView.swift in Sources */,
