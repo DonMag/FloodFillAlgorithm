@@ -60,7 +60,7 @@ struct MyBuffer {
 		}
 	}
 	
-	mutating func fillLine(pt1: MyPoint, pt2: MyPoint, lineWidth: Int, colorNumber: Int) -> Void {
+	mutating func fillLine(pt1: CGPoint, pt2: CGPoint, lineWidth: Int, colorNumber: Int) -> Void {
 		
 		let x1: CGFloat = CGFloat(pt1.x)
 		let x2: CGFloat = CGFloat(pt2.x)
@@ -413,11 +413,6 @@ extension FloodView {
 	
 }
 
-struct MyPoint {
-	var x: CGFloat = 0
-	var y: CGFloat = 0
-}
-
 // MARK: Shapes
 extension FloodView {
 	
@@ -483,8 +478,8 @@ extension FloodView {
 		let left: CGFloat = floor(Double(screenBuffer.w) * 0.1)
 		let right: CGFloat = CGFloat(screenBuffer.w) - left
 		
-		var pt1 = MyPoint(x: floor(Double(screenBuffer.w) / 2), y: top)
-		var pt2 = MyPoint(x: left, y: bot)
+		var pt1 = CGPoint(x: floor(Double(screenBuffer.w) / 2), y: top)
+		var pt2 = CGPoint(x: left, y: bot)
 
 		screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: Int(lineW), colorNumber: 1)
 		
@@ -492,8 +487,8 @@ extension FloodView {
 		
 		screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: Int(lineW), colorNumber: 1)
 		
-		pt1 = MyPoint(x: left, y: bot)
-		pt2 = MyPoint(x: right, y: bot)
+		pt1 = CGPoint(x: left, y: bot)
+		pt2 = CGPoint(x: right, y: bot)
 		
 		screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: Int(lineW), colorNumber: 1)
 		
@@ -513,8 +508,8 @@ extension FloodView {
 		let left: CGFloat = floor(Double(screenBuffer.w) * 0.1)
 		let right: CGFloat = CGFloat(screenBuffer.w) - left
 		
-		var pt1 = MyPoint(x: floor(Double(screenBuffer.w) / 2), y: top)
-		var pt2 = MyPoint(x: left, y: bot)
+		var pt1 = CGPoint(x: floor(Double(screenBuffer.w) / 2), y: top)
+		var pt2 = CGPoint(x: left, y: bot)
 		
 		screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: Int(lineW), colorNumber: 1)
 		
@@ -522,8 +517,8 @@ extension FloodView {
 		
 		screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: Int(lineW), colorNumber: 1)
 		
-		pt1 = MyPoint(x: left, y: bot)
-		pt2 = MyPoint(x: right, y: bot)
+		pt1 = CGPoint(x: left, y: bot)
+		pt2 = CGPoint(x: right, y: bot)
 		
 		screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: Int(lineW), colorNumber: 1)
 		
@@ -554,7 +549,7 @@ extension FloodView {
 			let y1 = CGFloat(Int.random(in: 0...Int(bounds.height - 10)))
 			let x2 = CGFloat(Int.random(in: 0...Int(bounds.width - 10)))
 			let y2 = CGFloat(Int.random(in: 0...Int(bounds.height - 10)))
-			screenBuffer.fillLine(pt1: MyPoint(x: x1, y: y1), pt2: MyPoint(x: x2, y: y2), lineWidth: 8, colorNumber: i % m)
+			screenBuffer.fillLine(pt1: CGPoint(x: x1, y: y1), pt2: CGPoint(x: x2, y: y2), lineWidth: 8, colorNumber: i % m)
 		}
 		
 	}
