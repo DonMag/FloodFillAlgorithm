@@ -72,6 +72,7 @@ struct MyBuffer {
 		var w: CGFloat = x2 - x1
 		var h: CGFloat = y2 - y1
 		
+		// if width == 0 (40,40 -> 40,140) it's a vertical line
 		if w == 0 {
 			var y = min(y1, y2)
 			h = max(y1, y2) - y
@@ -80,6 +81,7 @@ struct MyBuffer {
 			fillRect(CGRect(x: x1 - halfLineWidth, y: y, width: CGFloat(lineWidth), height: h), colorNumber: colorNumber)
 			return
 		}
+		// if height == 0 (40,40 -> 140,40) it's a vertical line
 		if h == 0 {
 			var x = min(x1, x2)
 			w = max(x1, x2) - x
@@ -134,17 +136,15 @@ struct MyBuffer {
 		
 		
 		var points: [CGPoint] = []
-		var p: CGPoint = .zero
 		
 		points.append(pp1)
 
 		let lw = CGFloat(lineWidth)
-		var rects: [CGRect] = []
 		
 		if segW == 1 {
 			pp1.x -= lw * 0.5
 			for _ in 0..<Int(steps) {
-				var r = CGRect(x: pp1.x, y: pp1.y, width: lw, height: ceil(segH))
+				let r = CGRect(x: pp1.x, y: pp1.y, width: lw, height: ceil(segH))
 				self.fillRect(r, colorNumber: colorNumber)
 				pp1.x += xDir
 				pp1.y += segH * yDir
@@ -152,83 +152,12 @@ struct MyBuffer {
 		} else {
 			pp1.y -= lw * 0.5
 			for _ in 0..<Int(steps) {
-				var r = CGRect(x: pp1.x, y: pp1.y, width: ceil(segW), height: lw)
+				let r = CGRect(x: pp1.x, y: pp1.y, width: ceil(segW), height: lw)
 				self.fillRect(r, colorNumber: colorNumber)
 				pp1.x += segW * xDir
 				pp1.y += yDir
 			}
 		}
-		
-		return()
-		
-		for _ in 0..<Int(steps) {
-			pp1.x += segW == 1 ? 0 : segW * xDir
-			pp1.y += segH == 1 ? 0 : segH * yDir
-			p = pp1
-			p.x = xDir == 1 ? floor(p.x) : ceil(p.x)
-			p.y = yDir == 1 ? floor(p.y) : ceil(p.y)
-			points.append(p)
-			pp1.x += segW == 1 ? segW * xDir : 0
-			pp1.y += segH == 1 ? segH * yDir : 0
-			p = pp1
-//			p.x = xDir == 1 ? floor(p.x) : ceil(p.x)
-//			p.y = yDir == 1 ? floor(p.y) : ceil(p.y)
-			p.x = xDir == 1 ? ceil(p.x) : floor(p.x)
-			p.y = yDir == 1 ? ceil(p.y) : floor(p.y)
-			points.append(p)
-		}
-		
-		points.removeLast()
-		
-		var r: CGRect = .zero
-
-		
-		if segW == 1 {
-			for i in stride(from: 0, to: points.count, by: 2) {
-				let x = points[i].x - halfLineWidth
-				let w = CGFloat(lineWidth)
-				let y = points[i].y
-				let h = points[i + 1].y * yDir - points[i].y * yDir
-				self.fillRect(CGRect(x: x, y: y, width: w, height: h), colorNumber: colorNumber)
-			}
-		} else {
-			for i in stride(from: 0, to: points.count, by: 2) {
-				let y = points[i].y - halfLineWidth
-				let h = CGFloat(lineWidth)
-				let x = points[i].x
-				let w = points[i + 1].x * xDir - points[i].x * xDir
-				self.fillRect(CGRect(x: x, y: y, width: w, height: h), colorNumber: colorNumber)
-			}
-		}
-		
-		return()
-		
-		var rW: CGFloat = 0
-		var rH: CGFloat = 0
-		
-		var xStep: CGFloat = CGFloat(w) / CGFloat(lineWidth)
-		var yStep: CGFloat = CGFloat(h) / CGFloat(lineWidth)
-		
-		let n: Int = Int(min(abs(xStep), abs(yStep))) + 1
-		
-		if abs(w) > abs(h) {
-			rW = abs(w / min(abs(xStep), abs(yStep)))
-			rH = CGFloat(lineWidth)
-		} else {
-			rH = abs(h / min(abs(xStep), abs(yStep)))
-			rW = CGFloat(lineWidth)
-		}
-
-		xStep = w / CGFloat(n)
-		yStep = h / CGFloat(n)
-
-		r = CGRect(x: CGFloat(x1), y: CGFloat(y1), width: rW, height: rH)
-		for _ in 0..<n {
-			self.fillRect(r, colorNumber: colorNumber)
-			r.origin.x += CGFloat(xStep)
-			r.origin.y += CGFloat(yStep)
-		}
-
 	}
 }
 
@@ -255,7 +184,7 @@ class TmpView: UIView {
 		super.layoutSubviews()
 
 		var pt1: CGPoint = CGPoint(x: 124, y: 21)
-		var pt2: CGPoint = CGPoint(x: 25, y: 231)
+		let pt2: CGPoint = CGPoint(x: 25, y: 231)
 
 		var w: CGFloat = pt2.x - pt1.x
 		var h: CGFloat = pt2.y - pt1.y
@@ -485,8 +414,8 @@ extension FloodView {
 }
 
 struct MyPoint {
-	var x: Int = 0
-	var y: Int = 0
+	var x: CGFloat = 0
+	var y: CGFloat = 0
 }
 
 // MARK: Shapes
@@ -543,47 +472,67 @@ extension FloodView {
 
 	}
 	
-	@objc func setupTriangle() {
+	@objc func xsetupTriangle() {
 
 		// clear with color 0
 		screenBuffer.clear(with: 0)
 
-		let lineW: Int = Int(floor(Double(screenBuffer.w) * 0.05))
-		let top: Int = Int(floor(Double(screenBuffer.h) * 0.1)) - lineW / 2
-		let bot: Int = screenBuffer.h - top - lineW
-		let left: Int = Int(floor(Double(screenBuffer.w) * 0.1))
-		let right: Int = screenBuffer.w - left
+		let lineW: CGFloat = floor(Double(screenBuffer.w) * 0.05)
+		let top: CGFloat = floor(Double(screenBuffer.h) * 0.1) - floor(lineW / 2)
+		let bot: CGFloat = CGFloat(screenBuffer.h) - top - lineW
+		let left: CGFloat = floor(Double(screenBuffer.w) * 0.1)
+		let right: CGFloat = CGFloat(screenBuffer.w) - left
 		
-		var pt1 = MyPoint(x: screenBuffer.w / 2, y: top)
+		var pt1 = MyPoint(x: floor(Double(screenBuffer.w) / 2), y: top)
 		var pt2 = MyPoint(x: left, y: bot)
 
-		screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: lineW, colorNumber: 1)
+		screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: Int(lineW), colorNumber: 1)
 		
 		pt2.x = right
 		
-		screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: lineW, colorNumber: 1)
+		screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: Int(lineW), colorNumber: 1)
 		
 		pt1 = MyPoint(x: left, y: bot)
 		pt2 = MyPoint(x: right, y: bot)
 		
-		screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: lineW, colorNumber: 1)
+		screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: Int(lineW), colorNumber: 1)
 		
 	}
-	
+
+	@objc func setupTriangle() {
+		
+		// clear with color 0
+		screenBuffer.clear(with: 0)
+		
+		let lineW: CGFloat = floor(Double(screenBuffer.w) * 0.05)
+		
+		
+		
+		let top: CGFloat = floor(Double(screenBuffer.h) * 0.1) - floor(lineW / 2)
+		let bot: CGFloat = CGFloat(screenBuffer.h) - top - lineW
+		let left: CGFloat = floor(Double(screenBuffer.w) * 0.1)
+		let right: CGFloat = CGFloat(screenBuffer.w) - left
+		
+		var pt1 = MyPoint(x: floor(Double(screenBuffer.w) / 2), y: top)
+		var pt2 = MyPoint(x: left, y: bot)
+		
+		screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: Int(lineW), colorNumber: 1)
+		
+		pt2.x = right
+		
+		screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: Int(lineW), colorNumber: 1)
+		
+		pt1 = MyPoint(x: left, y: bot)
+		pt2 = MyPoint(x: right, y: bot)
+		
+		screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: Int(lineW), colorNumber: 1)
+		
+	}
+
 	@objc func setupRandom() {
 		
 		// clear with last color
 		screenBuffer.clear(with: colors.count - 1)
-
-//		let x1 = 100
-//		let y1 = 100
-//		let x2 = 190
-//		let y2 = 102
-//
-//		screenBuffer.fillLine(pt1: MyPoint(x: x1, y: y1), pt2: MyPoint(x: x2, y: y2), lineWidth: 8, colorNumber: 0)
-//
-//		return
-		
 
 		let sizes: [Int] = [
 			Int(bounds.width * 0.25),
@@ -591,29 +540,20 @@ extension FloodView {
 			Int(bounds.width * 0.15),
 		]
 		
-		// don't use ;ast color
+		// don't use last color
 		let m = colors.count - 1
-		for i in 1...30 {
-			let x = Int.random(in: 0...Int(bounds.width - 10))
-			let y = Int.random(in: 0...Int(bounds.height - 10))
+		for i in 0..<m*3 {
+			let x = CGFloat(Int.random(in: 0...Int(bounds.width - 10)))
+			let y = CGFloat(Int.random(in: 0...Int(bounds.height - 10)))
 			let z = CGFloat(sizes[i % sizes.count])
-			screenBuffer.fillRect(CGRect(x: CGFloat(x), y: CGFloat(y), width: z, height: z), colorNumber: i % m)
+			screenBuffer.fillRect(CGRect(x: x, y: y, width: z, height: z), colorNumber: i % m)
 		}
 		
-//		let x1 = 100
-//		let y1 = 100
-//		let x2 = 190
-//		let y2 = 102
-//
-//		screenBuffer.fillLine(pt1: MyPoint(x: x1, y: y1), pt2: MyPoint(x: x2, y: y2), lineWidth: 8, colorNumber: colors.count - 1)
-//
-//		return
-		
 		for i in 1...10 {
-			let x1 = Int.random(in: 0...Int(bounds.width - 10))
-			let y1 = Int.random(in: 0...Int(bounds.height - 10))
-			let x2 = Int.random(in: 0...Int(bounds.width - 10))
-			let y2 = Int.random(in: 0...Int(bounds.height - 10))
+			let x1 = CGFloat(Int.random(in: 0...Int(bounds.width - 10)))
+			let y1 = CGFloat(Int.random(in: 0...Int(bounds.height - 10)))
+			let x2 = CGFloat(Int.random(in: 0...Int(bounds.width - 10)))
+			let y2 = CGFloat(Int.random(in: 0...Int(bounds.height - 10)))
 			screenBuffer.fillLine(pt1: MyPoint(x: x1, y: y1), pt2: MyPoint(x: x2, y: y2), lineWidth: 8, colorNumber: i % m)
 		}
 		
