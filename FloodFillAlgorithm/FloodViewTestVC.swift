@@ -7,6 +7,22 @@
 
 import UIKit
 
+enum GridSize: String, Codable, CaseIterable {
+	case x64 = "64x64"
+	case x128 = "128x128"
+	case x256 = "256x256"
+	var size: CGFloat {
+		switch self {
+		case .x64:
+			return 64
+		case .x128:
+			return 128
+		case .x256:
+			return 256
+		}
+	}
+}
+
 class FloodViewTestVC: UIViewController {
 	
 	var gridWidth: Int = 128
@@ -16,8 +32,10 @@ class FloodViewTestVC: UIViewController {
 	var screenBuffer: [Int] = []
 	
 	let colors: [UIColor] = [
-		.red, .green, .blue,
-		.cyan, .magenta, .yellow,
+		.systemRed, .systemGreen, .systemBlue,
+		.cyan, .systemOrange, .yellow
+//		.red, .green, .blue,
+//		.cyan, .magenta, .yellow,
 		//		UIColor(red: 1.00, green: 0.60, blue: 0.60, alpha: 1.0),
 		//		UIColor(red: 0.60, green: 1.00, blue: 0.60, alpha: 1.0),
 		//		UIColor(red: 0.20, green: 0.85, blue: 1.00, alpha: 1.0),
@@ -93,10 +111,10 @@ class FloodViewTestVC: UIViewController {
 			return v
 		}()
 		
-		["64", "128", "256"].forEach { str in
+		GridSize.allCases.forEach { str in
 			let v = UIButton()
 			v.titleLabel?.font = .systemFont(ofSize: 13, weight: .light)
-			v.setTitle(str, for: [])
+			v.setTitle(str.rawValue, for: [])
 			v.backgroundColor = .systemBlue
 			v.setTitleColor(.white, for: .normal)
 			v.setTitleColor(.lightGray, for: .highlighted)
@@ -191,12 +209,11 @@ class FloodViewTestVC: UIViewController {
 	}
 	
 	@objc func newSizeTap(_ sender: Any?) {
-		var t: String = "64"
-		if let btn = sender as? UIButton {
-			t = btn.currentTitle ?? "64"
-		}
-		if let n = Int(t), n > 0 {
-			fvWidthConstraint.constant = CGFloat(n)
+		if let btn = sender as? UIButton,
+		   let ct = btn.currentTitle,
+		   let newSize = GridSize.init(rawValue: ct)
+		{
+			fvWidthConstraint.constant = CGFloat(newSize.size)
 		}
 	}
 	
@@ -208,7 +225,6 @@ class FloodViewTestVC: UIViewController {
 		{
 			floodView.floodShape = newShape
 		}
-		
 	}
 	
 }

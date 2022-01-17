@@ -11,154 +11,8 @@ enum FloodShape: String, Codable, CaseIterable {
 	case square = "Square"
 	case cross = "Cross"
 	case triangle = "Triangle"
+	case spiral = "Spiral"
 	case random = "Random"
-}
-
-struct MyBuffer {
-	var buffer: [Int] = []
-	var w: Int = 0
-	var h: Int = 0
-	func length() -> Int {
-		return w * h
-	}
-	func count() -> Int {
-		return buffer.count
-	}
-	
-	mutating func clear(with colorNumber: Int) -> Void {
-		buffer = Array(repeating: colorNumber, count: length())
-	}
-	mutating func fillRect(_ r: CGRect, colorNumber: Int) -> Void {
-		var x = Int(r.origin.x)
-		var y = Int(r.origin.y)
-		var w = Int(r.size.width)
-		var h = Int(r.size.height)
-		
-		if x < 0 {
-			w += x
-			x = 0
-		}
-		if y < 0 {
-			h += y
-			y = 0
-		}
-		x = min(x, self.w - w)
-		y = min(y, self.h - h)
-		w = min(w, self.w - x)
-		h = min(h, self.h - y)
-
-		guard x > -1 && x + w < self.w + 1,
-			  y > -1 && y + h < self.h + 1
-		else {
-			print("err")
-			return
-		}
-		
-		for row in y..<y+h {
-			let p = row * self.w + x
-			buffer.replaceSubrange(p..<p+w, with: repeatElement(colorNumber, count: w))
-		}
-	}
-	
-	mutating func fillLine(pt1: CGPoint, pt2: CGPoint, lineWidth: Int, colorNumber: Int) -> Void {
-		
-		let x1: CGFloat = CGFloat(pt1.x)
-		let x2: CGFloat = CGFloat(pt2.x)
-		let y1: CGFloat = CGFloat(pt1.y)
-		let y2: CGFloat = CGFloat(pt2.y)
-
-		let halfLineWidth: CGFloat = CGFloat(lineWidth / 2)
-
-		var w: CGFloat = x2 - x1
-		var h: CGFloat = y2 - y1
-		
-		// if width == 0 (40,40 -> 40,140) it's a vertical line
-		if w == 0 {
-			var y = min(y1, y2)
-			h = max(y1, y2) - y
-			y -= halfLineWidth
-			h += CGFloat(lineWidth)
-			fillRect(CGRect(x: x1 - halfLineWidth, y: y, width: CGFloat(lineWidth), height: h), colorNumber: colorNumber)
-			return
-		}
-		// if height == 0 (40,40 -> 140,40) it's a vertical line
-		if h == 0 {
-			var x = min(x1, x2)
-			w = max(x1, x2) - x
-			x -= halfLineWidth
-			w += CGFloat(lineWidth)
-			fillRect(CGRect(x: x, y: y1 - halfLineWidth, width: w, height: CGFloat(lineWidth)), colorNumber: colorNumber)
-			return
-		}
-
-		var pp1:CGPoint = CGPoint(x: pt1.x, y: pt1.y)
-		var pp2:CGPoint = CGPoint(x: pt2.x, y: pt2.y)
-		
-		// normalize for left-right
-		if pp1.x > pp2.x {
-			let tmp = pp1
-			pp1 = pp2
-			pp2 = tmp
-		} else {
-			// normalize for top-down
-			if pp1.y > pp2.y {
-				let tmp = pp1
-				pp1 = pp2
-				pp2 = tmp
-			}
-		}
-
-		w = pp2.x - pp1.x
-		h = pp2.y - pp1.y
-
-		let xDir: CGFloat = w > 0 ? 1 : -1
-		let yDir: CGFloat = h > 0 ? 1 : -1
-		
-		w *= xDir
-		h *= yDir
-		
-		var steps: CGFloat = 0
-		var segW: CGFloat = 0
-		var segH: CGFloat = 0
-		
-		if w > h {
-			h += 1
-			segW = w / h
-			steps = h //w / segW
-			segH = 1
-		} else {
-			w += 1
-			segH = h / w
-			steps = w //h / segH
-			segW = 1
-		}
-		
-		
-		
-		var points: [CGPoint] = []
-		
-		points.append(pp1)
-
-		let lw = CGFloat(lineWidth)
-		
-		if segW == 1 {
-			pp1.x -= lw * 0.5
-			for _ in 0..<Int(steps) {
-				let r = CGRect(x: pp1.x, y: pp1.y, width: lw, height: ceil(segH))
-				self.fillRect(r, colorNumber: colorNumber)
-				pp1.x += xDir
-				pp1.y += segH * yDir
-			}
-		} else {
-			pp1.y -= lw * 0.5
-			for _ in 0..<Int(steps) {
-				let r = CGRect(x: pp1.x, y: pp1.y, width: ceil(segW), height: lw)
-				self.fillRect(r, colorNumber: colorNumber)
-				pp1.x += segW * xDir
-				pp1.y += yDir
-			}
-		}
-	}
 }
 
 class TmpView: UIView {
@@ -258,6 +112,9 @@ class FloodView: UIView {
 				()
 			case .triangle:
 				setupTriangle()
+				()
+			case .spiral:
+				setupSpiral()
 				()
 			case .random:
 				setupRandom()
@@ -416,25 +273,6 @@ extension FloodView {
 // MARK: Shapes
 extension FloodView {
 	
-	@objc func xsetupSquare() {
-		
-		// init array to all Zeroes
-		screenBuffer.buffer = Array(repeating: 0, count: screenBuffer.length())
-		
-		let row1: Int = 2
-		let row2: Int = screenBuffer.h - (row1 + 1)
-		let col1: Int = 2
-		let col2: Int = screenBuffer.w - (col1 + 1)
-		
-		for r in row1...row2 {
-			for c in col1...col2 {
-				let p = r * screenBuffer.w + c
-				screenBuffer.buffer[p] = 1
-			}
-		}
-		
-	}
-	
 	@objc func setupSquare() {
 		
 		// clear with color 0
@@ -467,7 +305,7 @@ extension FloodView {
 
 	}
 	
-	@objc func xsetupTriangle() {
+	@objc func setupTriangle() {
 
 		// clear with color 0
 		screenBuffer.clear(with: 0)
@@ -494,33 +332,26 @@ extension FloodView {
 		
 	}
 
-	@objc func setupTriangle() {
+	@objc func setupSpiral() {
 		
 		// clear with color 0
 		screenBuffer.clear(with: 0)
 		
 		let lineW: CGFloat = floor(Double(screenBuffer.w) * 0.05)
 		
+		let spSize: Int = 8
+		let spLw: CGFloat = floor(bounds.width / CGFloat(spSize))
+		let pts: [CGPoint] = buildSpiral(sz: spSize)
 		
-		
-		let top: CGFloat = floor(Double(screenBuffer.h) * 0.1) - floor(lineW / 2)
-		let bot: CGFloat = CGFloat(screenBuffer.h) - top - lineW
-		let left: CGFloat = floor(Double(screenBuffer.w) * 0.1)
-		let right: CGFloat = CGFloat(screenBuffer.w) - left
-		
-		var pt1 = CGPoint(x: floor(Double(screenBuffer.w) / 2), y: top)
-		var pt2 = CGPoint(x: left, y: bot)
-		
-		screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: Int(lineW), colorNumber: 1)
-		
-		pt2.x = right
-		
-		screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: Int(lineW), colorNumber: 1)
-		
-		pt1 = CGPoint(x: left, y: bot)
-		pt2 = CGPoint(x: right, y: bot)
-		
-		screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: Int(lineW), colorNumber: 1)
+		var pt1: CGPoint = .zero
+		var pt2: CGPoint = .zero
+
+		pt1 = pts[0].multipliedBy(dx: spLw, dy: spLw).offsetBy(dx: lineW, dy: lineW)
+		for i in 1..<pts.count {
+			pt2 = pts[i].multipliedBy(dx: spLw, dy: spLw).offsetBy(dx: lineW, dy: lineW)
+			screenBuffer.fillLine(pt1: pt1, pt2: pt2, lineWidth: Int(lineW), colorNumber: 1)
+			pt1 = pt2
+		}
 		
 	}
 
@@ -534,6 +365,43 @@ extension FloodView {
 			Int(bounds.width * 0.20),
 			Int(bounds.width * 0.15),
 		]
+
+		var newVals: [Int] = [
+			0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0,
+			0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0,
+			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+			0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0,
+			0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0,
+		]
+		screenBuffer.replaceRectWithAlpha(CGRect(x: 0, y: 0, width: 12, height: 8), with: newVals, alpha: 0)
+
+		screenBuffer.replaceRectWithAlpha(CGRect(x: 100, y: 100, width: 12, height: 8), with: newVals, alpha: nil)
+
+		return()
+		
+		newVals = [
+			2, 2, 3, 3, 3, 4, 4,
+			2, 2, 3, 3, 3, 4, 4,
+			2, 2, 5, 5, 5, 4, 4,
+			2, 2, 3, 3, 3, 4, 4,
+			2, 2, 3, 3, 3, 4, 4,
+		]
+		
+		screenBuffer.replaceRectWithAlpha(CGRect(x: 0, y: 0, width: 7, height: 5), with: newVals, alpha: nil)
+		
+		return()
+		
+		var x: CGFloat = 0
+		var y: CGFloat = 0
+		var w: CGFloat = 1
+		var h: CGFloat = 1
+		w = 1
+		h = 100
+		screenBuffer.fillRect(CGRect(x: x, y: y, width: w, height: h), colorNumber: 1)
+		return()
 		
 		// don't use last color
 		let m = colors.count - 1
@@ -554,4 +422,77 @@ extension FloodView {
 		
 	}
 	
+	func buildSpiral(sz: Int) -> [CGPoint] {
+		
+		enum MoveDir: Int {
+			case r, l, d, u
+		}
+		
+		var points: [CGPoint] = []
+		
+		var row: Int = 0
+		var col: Int = 0
+		var boundary: Int = sz - 1
+		var sizeLeft: Int = sz - 1
+		var bFlag: Bool = false
+		
+		var move: MoveDir = .r
+		
+		for i in 1...(sz * sz) {
+			switch move {
+			case .r:
+				col += 1
+				
+			case .l:
+				col -= 1
+				
+			case .u:
+				row -= 1
+				
+			case .d:
+				row += 1
+			}
+			
+			if i == boundary {
+				let p = CGPoint(x: col, y: row)
+				points.append(p)
+				
+				boundary += sizeLeft
+
+				if !bFlag {
+					bFlag = true
+				} else {
+					bFlag = false
+					sizeLeft -= 1
+				}
+				
+				switch move {
+				case .r:
+					move = .d
+					
+				case .l:
+					move = .u
+					
+				case .u:
+					move = .r
+					
+				case .d:
+					move = .l
+				}
+				
+			}
+		}
+		
+		return points
+	}
+	
+}
+
+extension CGPoint {
+	func offsetBy(dx: CGFloat, dy: CGFloat) -> CGPoint {
+		return CGPoint(x: x + dx, y: y + dy)
+	}
+	func multipliedBy(dx: CGFloat, dy: CGFloat) -> CGPoint {
+		return CGPoint(x: x * dx, y: y * dy)
+	}
 }
