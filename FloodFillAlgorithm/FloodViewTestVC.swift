@@ -25,23 +25,9 @@ enum GridSize: String, Codable, CaseIterable {
 
 class FloodViewTestVC: UIViewController {
 	
-	var gridWidth: Int = 128
-	var gridHeight: Int = 128
-	var bufLength: Int = 0
-	
-	var screenBuffer: [Int] = []
-	
 	let colors: [UIColor] = [
 		.systemRed, .systemGreen, .systemBlue,
-		.cyan, .systemOrange, .yellow
-//		.red, .green, .blue,
-//		.cyan, .magenta, .yellow,
-		//		UIColor(red: 1.00, green: 0.60, blue: 0.60, alpha: 1.0),
-		//		UIColor(red: 0.60, green: 1.00, blue: 0.60, alpha: 1.0),
-		//		UIColor(red: 0.20, green: 0.85, blue: 1.00, alpha: 1.0),
-		//		UIColor(red: 1.00, green: 1.00, blue: 0.60, alpha: 1.0),
-		//		UIColor(red: 0.60, green: 1.00, blue: 1.00, alpha: 1.0),
-		//		UIColor(red: 1.00, green: 0.60, blue: 1.00, alpha: 1.0),
+		.cyan, .systemOrange, .yellow,
 	]
 	
 	var fvWidthConstraint: NSLayoutConstraint!
@@ -140,7 +126,6 @@ class FloodViewTestVC: UIViewController {
 		view.addSubview(optionsStack)
 		
 		floodView.translatesAutoresizingMaskIntoConstraints = false
-		floodView.backgroundColor = .green
 		view.addSubview(floodView)
 		
 		view.addSubview(infoLabel)
@@ -155,7 +140,6 @@ class FloodViewTestVC: UIViewController {
 			shapeStack.leadingAnchor.constraint(equalTo: g.leadingAnchor, constant: 16),
 			shapeStack.trailingAnchor.constraint(equalTo: g.trailingAnchor, constant: -16),
 			
-			//floodView.widthAnchor.constraint(equalToConstant: 256.0),
 			fvWidthConstraint,
 			floodView.heightAnchor.constraint(equalTo: floodView.widthAnchor),
 			floodView.centerXAnchor.constraint(equalTo: g.centerXAnchor),
@@ -167,16 +151,6 @@ class FloodViewTestVC: UIViewController {
 			
 		])
 		
-		let v = TmpView()
-		v.translatesAutoresizingMaskIntoConstraints = false
-		view.addSubview(v)
-		NSLayoutConstraint.activate([
-			v.topAnchor.constraint(equalTo: floodView.topAnchor),
-			v.leadingAnchor.constraint(equalTo: floodView.leadingAnchor),
-			v.trailingAnchor.constraint(equalTo: floodView.trailingAnchor),
-			v.bottomAnchor.constraint(equalTo: floodView.bottomAnchor),
-		])
-	
 		// set colors array
 		floodView.colors = colors
 		
@@ -188,9 +162,6 @@ class FloodViewTestVC: UIViewController {
 
 		floodView.floodShape = .square
 		
-		//floodView.isHidden = true
-		//v.backgroundColor = .clear
-		v.isHidden = true
 	}
 	
 	@objc func newColorTap(_ sender: Any?) {
@@ -217,7 +188,6 @@ class FloodViewTestVC: UIViewController {
 		}
 	}
 	
-	// MARK: grid setups
 	@objc func newShapeTap(_ sender: Any?) {
 		if let btn = sender as? UIButton,
 		   let ct = btn.currentTitle,
