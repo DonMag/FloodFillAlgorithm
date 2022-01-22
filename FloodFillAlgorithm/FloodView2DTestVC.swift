@@ -1,29 +1,13 @@
 //
-//  FloodViewTestVC.swift
-//  SW15Scratch
+//  FloodView2DTestVC.swift
+//  FloodFillAlgorithm
 //
-//  Created by Don Mag on 1/14/22.
+//  Created by Don Mag on 1/22/22.
 //
 
 import UIKit
 
-enum GridSize: String, Codable, CaseIterable {
-	case x64 = "64x64"
-	case x128 = "128x128"
-	case x256 = "256x256"
-	var size: CGFloat {
-		switch self {
-		case .x64:
-			return 64
-		case .x128:
-			return 128
-		case .x256:
-			return 256
-		}
-	}
-}
-
-class FloodViewTestVC: UIViewController, FloodViewDelegate {
+class FloodView2DTestVC: UIViewController, FloodViewDelegate {
 	
 	let colors: [UIColor] = [
 		.systemRed, .systemGreen, .systemBlue,
@@ -32,7 +16,7 @@ class FloodViewTestVC: UIViewController, FloodViewDelegate {
 	
 	var fvWidthConstraint: NSLayoutConstraint!
 	
-	let floodView = FloodView()
+	let floodView = FloodView2D()
 	
 	let infoLabelAlgorithm: UILabel = {
 		let v = UILabel()
@@ -81,7 +65,7 @@ class FloodViewTestVC: UIViewController, FloodViewDelegate {
 			v.translatesAutoresizingMaskIntoConstraints = false
 			return v
 		}()
-
+		
 		FloodShape.allCases.forEach { shp in
 			let v = UIButton()
 			v.titleLabel?.font = .systemFont(ofSize: 13, weight: .light)
@@ -143,7 +127,7 @@ class FloodViewTestVC: UIViewController, FloodViewDelegate {
 			v.translatesAutoresizingMaskIntoConstraints = false
 			view.addSubview(v)
 		}
-
+		
 		let g = view.safeAreaLayoutGuide
 		
 		fvWidthConstraint = floodView.widthAnchor.constraint(equalToConstant: 256.0)
@@ -180,13 +164,24 @@ class FloodViewTestVC: UIViewController, FloodViewDelegate {
 			colorStack.arrangedSubviews[i].layer.borderWidth = i == 2 ? 2 : 0
 		}
 		floodView.newColor = 2
-
+		
 		floodView.floodShape = .square
 		
 		floodView.delegate = self
+	
+		floodView.scale = 8
+		floodView.offset = CGPoint(x: 123 - 10, y: 20)
+		
+		let t = UITapGestureRecognizer(target: self, action: #selector(cellTap(_:)))
+		floodView.addGestureRecognizer(t)
 
 	}
 	
+	@objc func cellTap(_ g: UITapGestureRecognizer) {
+		guard let v = g.view as? FloodView2D else { return }
+		v.cellTap(at: g.location(in: v))
+	}
+
 	@objc func newColorTap(_ sender: Any?) {
 		
 		guard let btn = sender as? UIButton,
