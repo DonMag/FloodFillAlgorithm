@@ -7,19 +7,6 @@
 
 import UIKit
 
-enum FloodShape: String, Codable, CaseIterable {
-	case square = "Square"
-	case cross = "Cross"
-	case triangle = "Triangle"
-	case spiral = "Spiral"
-	case random = "Random"
-}
-
-@objc protocol FloodViewDelegate {
-	@objc optional func algorithmTime(_ t: CFTimeInterval, changed: Bool)
-	@objc optional func drawTime(_ t: CFTimeInterval)
-}
-
 class FloodView: UIView {
 	
 	public var floodShape: FloodShape = .square {

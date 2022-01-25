@@ -46,8 +46,17 @@ class FloodView2D: UIView {
 	
 	public var delegate: FloodViewDelegate?
 	
-	var scale: Int = 1
-	var offset: CGPoint = .zero
+	var maxScale: Int = 64
+	var scale: Int = 1 {
+		didSet {
+			setNeedsDisplay()
+		}
+	}
+	var offset: CGPoint = .zero {
+		didSet {
+			setNeedsDisplay()
+		}
+	}
 	
 	override var bounds: CGRect {
 		didSet {
@@ -71,12 +80,8 @@ class FloodView2D: UIView {
 		commonInit()
 	}
 	func commonInit() {
-//		let t = UITapGestureRecognizer(target: self, action: #selector(cellTap(_:)))
-//		addGestureRecognizer(t)
 	}
 	
-//	@objc func cellTap(_ g: UITapGestureRecognizer) {
-
 	@objc func cellTap(at pt: CGPoint) {
 
 		let r: Int = Int((pt.y / CGFloat(scale)) + offset.y)
@@ -98,6 +103,61 @@ class FloodView2D: UIView {
 
 	}
 	
+	func cellTap(at pt: CGPoint, mode: Mode) {
+		
+		let r: Int = Int((pt.y / CGFloat(scale)) + offset.y)
+		let c: Int = Int((pt.x / CGFloat(scale)) + offset.x)
+	
+		switch mode {
+		case .zoomIn:
+			if scale < maxScale {
+				scale *= 2
+				let w = screenBuffer.w / scale
+				let h = screenBuffer.h / scale
+				var x: Int = c - w / 2
+				var y: Int = r - h / 2
+				x = max(0, min(x, screenBuffer.w - w))
+				y = max(0, min(y, screenBuffer.h - h))
+				offset = CGPoint(x: x, y: y)
+				setNeedsDisplay()
+			}
+			()
+		case .zoomOut:
+			if scale > 1 {
+				scale /= 2
+				let w = screenBuffer.w / scale
+				let h = screenBuffer.h / scale
+				var x: Int = c - w / 2
+				var y: Int = r - h / 2
+				x = max(0, min(x, screenBuffer.w - w))
+				y = max(0, min(y, screenBuffer.h - h))
+				offset = CGPoint(x: x, y: y)
+				setNeedsDisplay()
+			}
+			()
+		case .pan:
+			()
+		case .draw:
+			()
+		case .flood:
+			let oldColor: Int = screenBuffer.buffer[r][c]
+			
+			let st = CFAbsoluteTimeGetCurrent()
+			
+			let bChanged = floodFillScanlineStack(x: c, y: r, newColor: newColor, oldColor: oldColor, h: screenBuffer.h, w: screenBuffer.w)
+			
+			let elapsed = CFAbsoluteTimeGetCurrent() - st
+			
+			delegate?.algorithmTime?(elapsed, changed: bChanged)
+			
+			if bChanged {
+				setNeedsDisplay()
+			}
+		}
+		
+		
+	}
+	
 	override func draw(_ rect: CGRect) {
 		super.draw(rect)
 		
@@ -108,8 +168,8 @@ class FloodView2D: UIView {
 			let size: CGSize = CGSize(width: screenBuffer.w / scale, height: screenBuffer.h / scale)
 			var drawR: CGRect = CGRect(origin: .zero, size: CGSize(width: CGFloat(scale), height: CGFloat(scale)))
 
-//			offset.x = CGFloat(screenBuffer.w - (screenBuffer.w / scale))
-//			offset.y = CGFloat(screenBuffer.h - (screenBuffer.h / scale))
+			let xOff: Int = Int(offset.x)
+			let yOff: Int = Int(offset.y)
 			
 			var pt: CGPoint = .zero
 
@@ -119,7 +179,7 @@ class FloodView2D: UIView {
 
 			for r in 0..<Int(size.height) {
 				for c in 0..<Int(size.width) {
-					colors[screenBuffer.buffer[r + Int(offset.y)][c + Int(offset.x)]].setFill()
+					colors[screenBuffer.buffer[r + yOff][c + xOff]].setFill()
 					drawR.origin = pt
 					context.fill(drawR)
 					if scale > 4 {
@@ -130,13 +190,6 @@ class FloodView2D: UIView {
 				pt.x = 0
 				pt.y += CGFloat(scale)
 			}
-
-//			for r in 0..<screenBuffer.h {
-//				for c in 0..<screenBuffer.w {
-//					colors[screenBuffer.buffer[r][c]].setFill()
-//					context.fill(CGRect(x: c, y: r, width: 1, height: 1))
-//				}
-//			}
 			
 			let elapsed = CFAbsoluteTimeGetCurrent() - st
 			delegate?.drawTime?(elapsed)

@@ -18,6 +18,8 @@ class FloodView2DTestVC: UIViewController, FloodViewDelegate {
 	
 	let floodView = FloodView2D()
 	
+	var mode: Mode = .flood
+	
 	let infoLabelAlgorithm: UILabel = {
 		let v = UILabel()
 		v.textAlignment = .center
@@ -81,7 +83,7 @@ class FloodView2DTestVC: UIViewController, FloodViewDelegate {
 		}
 		
 		// setup size selection UI
-		let sizeStack: UIStackView = {
+		let modeStack: UIStackView = {
 			let v = UIStackView()
 			v.spacing = 8
 			v.distribution = .fillEqually
@@ -89,19 +91,17 @@ class FloodView2DTestVC: UIViewController, FloodViewDelegate {
 			return v
 		}()
 		
-		GridSize.allCases.forEach { str in
-			let v = UIButton()
-			v.titleLabel?.font = .systemFont(ofSize: 13, weight: .light)
-			v.setTitle(str.rawValue, for: [])
-			v.backgroundColor = .systemBlue
-			v.setTitleColor(.white, for: .normal)
-			v.setTitleColor(.lightGray, for: .highlighted)
-			v.layer.borderColor = UIColor.blue.cgColor
-			v.layer.borderWidth = 1
-			v.layer.cornerRadius = 6
-			v.addTarget(self, action: #selector(newSizeTap(_:)), for: .touchUpInside)
-			sizeStack.addArrangedSubview(v)
+		let modeSeg: UISegmentedControl = {
+			let v = UISegmentedControl()
+			v.translatesAutoresizingMaskIntoConstraints = false
+			return v
+		}()
+		
+		for (idx, m) in Mode.allCases.enumerated() {
+			modeSeg.insertSegment(withTitle: m.stringValue, at: idx, animated: false)
 		}
+		//modeSeg.selectedSegmentIndex = Mode.allCases.count - 1
+		modeSeg.selectedSegmentIndex = Mode.flood.rawValue
 		
 		let optionsStack: UIStackView = {
 			let v = UIStackView()
@@ -113,7 +113,7 @@ class FloodView2DTestVC: UIViewController, FloodViewDelegate {
 		
 		optionsStack.addArrangedSubview(shapeStack)
 		optionsStack.addArrangedSubview(colorStack)
-		optionsStack.addArrangedSubview(sizeStack)
+		optionsStack.addArrangedSubview(modeSeg)
 		
 		view.addSubview(optionsStack)
 		
@@ -169,17 +169,15 @@ class FloodView2DTestVC: UIViewController, FloodViewDelegate {
 		
 		floodView.delegate = self
 	
-		floodView.scale = 8
-		floodView.offset = CGPoint(x: 123 - 10, y: 20)
-		
 		let t = UITapGestureRecognizer(target: self, action: #selector(cellTap(_:)))
 		floodView.addGestureRecognizer(t)
 
+		modeSeg.addTarget(self, action: #selector(modeChanged(_:)), for: .valueChanged)
 	}
 	
 	@objc func cellTap(_ g: UITapGestureRecognizer) {
 		guard let v = g.view as? FloodView2D else { return }
-		v.cellTap(at: g.location(in: v))
+		v.cellTap(at: g.location(in: v), mode: mode)
 	}
 
 	@objc func newColorTap(_ sender: Any?) {
@@ -205,7 +203,32 @@ class FloodView2DTestVC: UIViewController, FloodViewDelegate {
 			fvWidthConstraint.constant = CGFloat(newSize.size)
 		}
 	}
+
+	@objc func modeChanged(_ sender: Any?) {
+		if let seg = sender as? UISegmentedControl,
+		   let m = Mode.init(rawValue: seg.selectedSegmentIndex)
+		{
+			mode = m
+		}
+	}
 	
+	@objc func zoomTap(_ sender: Any?) {
+		if let btn = sender as? UIButton,
+		   let ct = btn.currentTitle
+		{
+			if ct == "Zoom In" {
+				if floodView.scale < 32 {
+					floodView.scale *= 2
+					floodView.offset = CGPoint(x: 128, y: 128)
+				}
+			} else {
+				if floodView.scale > 1 {
+					floodView.scale /= 2
+				}
+			}
+		}
+	}
+
 	@objc func newShapeTap(_ sender: Any?) {
 		if let btn = sender as? UIButton,
 		   let ct = btn.currentTitle,

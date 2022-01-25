@@ -51,6 +51,20 @@ struct MyBuffer2D {
 		}
 	}
 
+	func copyRect(_ r: CGRect) -> [[Int]] {
+		var x1 = Int(r.origin.x)
+		var y1 = Int(r.origin.y)
+		var x2 = x1 + Int(r.size.width)
+		var y2 = y1 + Int(r.size.height)
+
+		x1 = max(0, x1)
+		y1 = max(0, y1)
+		x2 = min(w, x2)
+		y2 = min(h, y2)
+
+		var buf: [[Int]] = []
+		return buf
+	}
 
 
 /*

@@ -7,22 +7,6 @@
 
 import UIKit
 
-enum GridSize: String, Codable, CaseIterable {
-	case x64 = "64x64"
-	case x128 = "128x128"
-	case x256 = "256x256"
-	var size: CGFloat {
-		switch self {
-		case .x64:
-			return 64
-		case .x128:
-			return 128
-		case .x256:
-			return 256
-		}
-	}
-}
-
 class FloodViewTestVC: UIViewController, FloodViewDelegate {
 	
 	let colors: [UIColor] = [
